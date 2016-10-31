@@ -23,37 +23,37 @@ class CounterViewController: UIViewController {
         let mins = newSeconds / 60
         let seconds = newSeconds % 60
 
-        timeLabel!.text = NSString(format: "%02d:%02d", mins, seconds)
+        timeLabel!.text = NSString(format: "%02d:%02d", mins, seconds) as String
         
         if newSeconds <= 0 {
             isCounting = false
             self.startStopButton!.alpha = 0.3
-            self.startStopButton!.enabled = false
+            self.startStopButton!.isEnabled = false
         } else {
             self.startStopButton!.alpha = 1.0
-            self.startStopButton!.enabled = true
+            self.startStopButton!.isEnabled = true
         }
 
     }
     }
     
-    var timer: NSTimer?
+    var timer: Timer?
     var isCounting: Bool = false {
     willSet(newValue) {
         if newValue {
-            timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: "updateTimer:", userInfo: nil, repeats: true)
+            timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(updateTimer(sender:)), userInfo: nil, repeats: true)
         } else {
             timer?.invalidate()
             timer = nil
         }
-        setSettingButtonsEnabled(!newValue)
+        setSettingButtonsEnabled(enabled: !newValue)
     }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        self.view.backgroundColor = UIColor.whiteColor()
+        self.view.backgroundColor = UIColor.white
 
         setupTimeLabel()
         setuptimeButtons()
@@ -70,16 +70,21 @@ class CounterViewController: UIViewController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         
-        timeLabel!.frame = CGRectMake(10, 40, self.view.bounds.size.width-20, 120)
         
-        let gap = ( self.view.bounds.size.width - 10*2 - (CGFloat(timeButtons!.count) * 64) ) / CGFloat(timeButtons!.count - 1)
-        for (index, button) in enumerate(timeButtons!) {
+        //CGRect(origin: CGPoint(x: 0,y :0), size: CGSize(width: 100, height: 100))
+        //timeLabel!.frame = CGRectMake(10, 40, self.view.bounds.size.width-20, 120)
+        timeLabel!.frame = CGRect(origin: CGPoint(x: 10, y: 40), size: CGSize(width: self.view.bounds.size.width - 20, height: 120))
+        
+        let gap = ( self.view.bounds.size.width - 10 * 2 - (CGFloat(timeButtons!.count) * 64) ) / CGFloat(timeButtons!.count - 1)
+        for (index, button) in timeButtons!.enumerated() {
             let buttonLeft = 10 + (64 + gap) * CGFloat(index)
-            button.frame = CGRectMake(buttonLeft, self.view.bounds.size.height-120, 64, 44)
+            button.frame = CGRect(origin: CGPoint(x: buttonLeft, y: self.view.bounds.size.height - 120), size: CGSize(width: 64, height: 44))
         }
         
-        startStopButton!.frame = CGRectMake(10, self.view.bounds.size.height-60, self.view.bounds.size.width-20-100, 44)
-        clearButton!.frame = CGRectMake(10+self.view.bounds.size.width-20-100+20, self.view.bounds.size.height-60, 80, 44)
+        startStopButton!.frame = CGRect(origin: CGPoint(x: 10, y: self.view.bounds.size.height - 60), size: CGSize(width: self.view.bounds.size.width - 20 - 100, height: 44))
+        let position = CGPoint(x: 10 + self.view.bounds.size.width - 20 - 100 + 20, y: self.view.bounds.size.height - 60)
+        let size = CGSize(width: 80, height: 44)
+        clearButton!.frame = CGRect(origin: position, size: size)
         
     }
     
@@ -89,10 +94,10 @@ class CounterViewController: UIViewController {
     func setupTimeLabel() {
         
         timeLabel = UILabel()
-        timeLabel!.textColor = UIColor.whiteColor()
+        timeLabel!.textColor = UIColor.white
         timeLabel!.font = UIFont(name: "Helvetica", size: 80)
-        timeLabel!.backgroundColor = UIColor.blackColor()
-        timeLabel!.textAlignment = NSTextAlignment.Center
+        timeLabel!.backgroundColor = UIColor.black
+        timeLabel!.textAlignment = NSTextAlignment.center
         
         self.view.addSubview(timeLabel!)
     }
@@ -100,17 +105,17 @@ class CounterViewController: UIViewController {
     func setuptimeButtons() {
         
         var buttons: [UIButton] = []
-        for (index, (title, _)) in enumerate(timeButtonInfos) {
+        for (index, (title, _)) in timeButtonInfos.enumerated() {
             
             let button: UIButton = UIButton()
             button.tag = index //保存按钮的index
-            button.setTitle("\(title)", forState: UIControlState.Normal)
+            button.setTitle("\(title)", for: UIControlState.normal)
             
-            button.backgroundColor = UIColor.orangeColor()
-            button.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-            button.setTitleColor(UIColor.blackColor(), forState: UIControlState.Highlighted)
+            button.backgroundColor = UIColor.orange
+            button.setTitleColor(UIColor.white, for: UIControlState.normal)
+            button.setTitleColor(UIColor.black, for: UIControlState.highlighted)
             
-            button.addTarget(self, action: "timeButtonTapped:", forControlEvents: UIControlEvents.TouchUpInside)
+            button.addTarget(self, action: #selector(timeButtonTapped(sender:)), for: UIControlEvents.touchUpInside)
             
             buttons += [button]
             self.view.addSubview(button)
@@ -124,20 +129,21 @@ class CounterViewController: UIViewController {
         
         //create start/stop button
         startStopButton = UIButton()
-        startStopButton!.backgroundColor = UIColor.redColor()
-        startStopButton!.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        startStopButton!.setTitleColor(UIColor.blackColor(), forState: UIControlState.Highlighted)
-        startStopButton!.setTitle("启动/停止", forState: UIControlState.Normal)
-        startStopButton!.addTarget(self, action: "startStopButtonTapped:", forControlEvents: UIControlEvents.TouchUpInside)
+        startStopButton!.backgroundColor = UIColor.red
+        startStopButton!.setTitleColor(UIColor.white, for: UIControlState.normal)
+        startStopButton!.setTitleColor(UIColor.black, for: UIControlState.highlighted)
+        startStopButton!.setTitle("启动/停止", for: UIControlState.normal)
+        startStopButton!.addTarget(self, action: #selector(startStopButtonTapped(sender:)), for: UIControlEvents.touchUpInside)
         
         self.view.addSubview(startStopButton!)
         
         clearButton = UIButton()
-        clearButton!.backgroundColor = UIColor.redColor()
-        clearButton!.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        clearButton!.setTitleColor(UIColor.blackColor(), forState: UIControlState.Highlighted)
-        clearButton!.setTitle("复位", forState: UIControlState.Normal)
-        clearButton!.addTarget(self, action: "clearButtonTapped:", forControlEvents: UIControlEvents.TouchUpInside)
+        clearButton!.backgroundColor = UIColor.red
+        clearButton!.setTitleColor(UIColor.white, for: UIControlState.normal)
+        clearButton!.setTitleColor(UIColor.black, for: UIControlState.highlighted)
+        clearButton!.setTitle("复位", for: UIControlState.normal)
+        
+        clearButton!.addTarget(self, action: #selector(clearButtonTapped(sender:)), for: UIControlEvents.touchUpInside)
         
         self.view.addSubview(clearButton!)
         
@@ -145,17 +151,17 @@ class CounterViewController: UIViewController {
     
     func setSettingButtonsEnabled(enabled: Bool) {
         for button in self.timeButtons! {
-            button.enabled = enabled
+            button.isEnabled = enabled
             button.alpha = enabled ? 1.0 : 0.3
         }
-        clearButton!.enabled = enabled
+        clearButton!.isEnabled = enabled
         clearButton!.alpha = enabled ? 1.0 : 0.3
     }
     
     //Actions
     
     func timeButtonTapped(sender: UIButton) {
-        let (title, seconds) = timeButtonInfos[sender.tag]
+        let (_, seconds) = timeButtonInfos[sender.tag]
         remainingSeconds += seconds
     }
     
@@ -163,9 +169,9 @@ class CounterViewController: UIViewController {
         isCounting = !isCounting
         
         if isCounting {
-            createAndFireLocalNotificationAfterSeconds(remainingSeconds)
+            createAndFireLocalNotificationAfterSeconds(seconds: remainingSeconds)
         } else {
-            UIApplication.sharedApplication().cancelAllLocalNotifications()
+            UIApplication.shared.cancelAllLocalNotifications()
         }
         
     }
@@ -174,14 +180,14 @@ class CounterViewController: UIViewController {
         remainingSeconds = 0
     }
     
-    func updateTimer(sender: NSTimer) {
+    func updateTimer(sender: Timer) {
         remainingSeconds -= 1
         
         if remainingSeconds <= 0 {
             let alert = UIAlertView()
             alert.title = "计时完成！"
             alert.message = ""
-            alert.addButtonWithTitle("OK")
+            alert.addButton(withTitle: "OK")
             alert.show()
 
         }
@@ -191,17 +197,16 @@ class CounterViewController: UIViewController {
     
     func createAndFireLocalNotificationAfterSeconds(seconds: Int) {
         
-        UIApplication.sharedApplication().cancelAllLocalNotifications()
+        UIApplication.shared.cancelAllLocalNotifications()
         let notification = UILocalNotification()
         
         let timeIntervalSinceNow = Double(seconds)
-        notification.fireDate = NSDate(timeIntervalSinceNow:timeIntervalSinceNow);
+        notification.fireDate = NSDate(timeIntervalSinceNow:timeIntervalSinceNow) as Date
         
-        notification.timeZone = NSTimeZone.systemTimeZone();
-        notification.alertBody = "计时完成！";
+        notification.timeZone = NSTimeZone.system
+        notification.alertBody = "计时完成！"
         
-        UIApplication.sharedApplication().scheduleLocalNotification(notification);
-        
+        UIApplication.shared.scheduleLocalNotification(notification)
     }
 
 
